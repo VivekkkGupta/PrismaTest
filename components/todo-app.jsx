@@ -1,29 +1,48 @@
 "use client";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Edit, Trash2, Check } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Header from "@/components/header"
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 export default function TodoApp() {
+
+  const { user } = useUser()
+
+
   const [todos, setTodos] = useState([])
   const [newTodo, setNewTodo] = useState("")
   const [editingId, setEditingId] = useState(null)
   const [editText, setEditText] = useState("")
 
-  const addTodo = () => {
+  const addTodo = async () => {
     if (newTodo.trim() === "") return
 
     const todo = {
       id: Date.now(),
-      text: newTodo,
+      title: newTodo,
       completed: false,
     }
 
     setTodos([...todos, todo])
+    const res = await axios.post("/api/set-todos", {
+      title: newTodo,
+      userId: user.id
+    }
+    )
+    console.log(res)
     setNewTodo("")
+    if (res.status !== 200) {
+      toast.error("Error saving in DB")
+      return
+    }
+
+    toast.success("Todo Added")
   }
 
   const deleteTodo = (id) => {
@@ -39,7 +58,7 @@ export default function TodoApp() {
   const startEdit = (todo) => {
     setEditingId(todo.id)
     setEditText(todo.text)
-  } 
+  }
 
   const saveEdit = () => {
     if (editText.trim() === "") return
@@ -55,6 +74,20 @@ export default function TodoApp() {
       addTodo()
     }
   }
+
+  const getTodos = async () => {
+    if (!user) {
+      return
+    }
+    const res = await axios.post("/api/get-todos", {
+      userId: user.id
+    })
+    console.log(res?.data?.message)
+    setTodos(res?.data?.message)
+  }
+  useEffect(() => {
+    getTodos()
+  }, [user])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -102,7 +135,7 @@ export default function TodoApp() {
                             onKeyDown={(e) => e.key === "Enter" && saveEdit()}
                             autoFocus />
                         ) : (
-                          todo.text
+                          todo.title
                         )}
                       </TableCell>
                       <TableCell className="text-right">
