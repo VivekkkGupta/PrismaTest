@@ -17,8 +17,6 @@ export const POST = async (req) => {
       return NextResponse.json({ message: "Not Authorized" }, { status: 500 });
     }
 
-    console.log("user found going to insert in db");
-    console.log(clerkId);
     const insertedTodo = await prisma.todo.create({
       data: {
         title: reqTitle,

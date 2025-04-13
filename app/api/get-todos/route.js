@@ -21,7 +21,7 @@ export const POST = async (req) => {
                 userId: clerkId
             }
         })
-        return NextResponse.json({ message: todos },{status:200})
+        return NextResponse.json({ message: "success",todos:todos},{status:200})
     } catch (error) {
         console.log("Failed: ",error)
         return NextResponse.json({
