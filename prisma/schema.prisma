@@ -13,12 +13,11 @@ model User{
   email     String?  @unique
   avatar    String?
   todos     Todo[]
-  password  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model  Todo{
+model Todo{
   id        String   @id @default(cuid())
   title     String
   completed Boolean  @default(false)
